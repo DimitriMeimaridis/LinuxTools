@@ -1,0 +1,36 @@
+# Create Folder That Will Be Shared
+sudo mkdir /PATH/TO/FOLDER
+
+#If On External Drive, Mount Drive at Boot
+sudo nano /etc/fstab
+UUID=cf22f697-500c-477a-b133-9bba345b9548 /PATH/TO/FOLDER    auto nosuid,nodev,nofail,x-gvfs-show 0 0
+#Get UUID Of Drive Partition (/dev/sda1)
+sudo blkid
+
+#Take Ownership Of Drive
+sudo chown -R USER:USER /PATH/TO/FOLDER
+sudo chmod -R ugo+wrx /PATH/TO/FOLDER
+
+# Install Samba
+sudo apt install samba -y
+
+#Stop Samba Service
+sudo systemctl stop smbd
+
+#Add Folder To Samba Config
+sudo nano /etc/samba/smb.conf
+'''
+[SSD]
+        path = /PATH/TO/FOLDER
+        force user = USER
+        force group = USER
+        create mask = 0664
+        force create mode = 0664
+        directory mask = 0775
+        force directory mode = 0775
+        public = yes
+        writable = yes
+'''
+
+#Restart Samba Service
+sudo systemctl restart smbd
